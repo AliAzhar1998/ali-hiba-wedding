@@ -649,40 +649,7 @@
   .reveal.visible { opacity: 1; transform: translateY(0); }
 
   /* ── MOBILE ── */
-  /* ── MUSIC PLAYER ── */
-  #music-player {
-    position: fixed;
-    bottom: 86px; right: 24px;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-  #music-btn {
-    background: rgba(201,169,110,0.18);
-    border: 1px solid rgba(201,169,110,0.45);
-    border-radius: 50%;
-    width: 52px; height: 52px;
-    font-size: 1.3rem;
-    cursor: pointer;
-    transition: background .2s, transform .2s;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--gold);
-    opacity: 1;
-    pointer-events: auto;
-  }
-  #music-btn:hover { background: rgba(201,169,110,0.32); transform: scale(1.08); }
-  #music-label {
-    display: block;
-    font-family: 'Lato', sans-serif;
-    font-weight: 300;
-    font-size: .6rem;
-    letter-spacing: .2em;
-    text-transform: uppercase;
-    color: var(--gold);
-    opacity: .75;
-  }
+
 
 
   /* ── SPLASH SCREEN ── */
@@ -1079,15 +1046,9 @@
 
 <!-- ═══════════ MUSIC PLAYER ═══════════ -->
 <audio id="bg-music" loop>
-  <source src="https://upload.wikimedia.org/wikipedia/commons/4/4e/BWV_543_fugue.ogg" type="audio/ogg"/>
-  <source src="https://www.bensound.com/bensound-music/bensound-romantic.mp3" type="audio/mpeg"/>
+  <source src="https://archive.org/download/christina-perri-a-thousand-years-official-music-video_20260529_2251/Christina%20Perri%20-%20A%20Thousand%20Years%20%5BOfficial%20Music%20Video%5D.mp3" type="audio/mpeg"/>
 </audio>
-<div id="music-player">
-  <button id="music-btn" onclick="toggleMusic()" title="Play/Pause Music">
-    <span id="music-icon">🎵</span>
-  </button>
-  <div id="music-label">Tap for music</div>
-</div>
+
 
 <!-- ═══════════ SHARE PANEL ═══════════ -->
 <div id="share-panel">
@@ -1304,24 +1265,6 @@ function copyLink() {
 
 // ── MUSIC ──
 const audio = document.getElementById('bg-music');
-let musicPlaying = false;
-
-function tryPlay() {
-  audio.volume = 0.7;
-  // Autoplay policy: attempt unmuted first (works because user just tapped)
-  audio.muted = false;
-  return audio.play().catch(() => {
-    // Fallback: play muted then immediately unmute (bypasses stricter policies)
-    audio.muted = true;
-    return audio.play().then(() => { audio.muted = false; });
-  });
-}
-
-function setMusicUI(playing) {
-  musicPlaying = playing;
-  document.getElementById('music-icon').textContent = playing ? '🔊' : '🎵';
-  document.getElementById('music-label').textContent = playing ? 'Playing ♪' : 'Music';
-}
 
 function openInvitation() {
   afterSplash();
@@ -1329,22 +1272,14 @@ function openInvitation() {
   splash.classList.add('hidden');
   setTimeout(() => { splash.style.display = 'none'; }, 1300);
 
-  // User tap = trusted gesture → play music now
-  tryPlay().then(() => setMusicUI(true)).catch(() => setMusicUI(false));
+  // User tap = trusted gesture — play music
+  audio.volume = 0.7;
+  audio.muted = false;
+  audio.play().catch(() => {
+    audio.muted = true;
+    audio.play().then(() => { audio.muted = false; }).catch(() => {});
+  });
 }
-
-function toggleMusic() {
-  if (musicPlaying) {
-    audio.pause();
-    setMusicUI(false);
-  } else {
-    tryPlay().then(() => setMusicUI(true)).catch(() => {});
-  }
-}
-
-audio.addEventListener('ended', () => setMusicUI(false));
-audio.addEventListener('pause',  () => { if (!audio.ended) setMusicUI(false); });
-audio.addEventListener('play',   () => setMusicUI(true));
 
 // Close share panel when clicking outside
 document.addEventListener('click', (e) => {
